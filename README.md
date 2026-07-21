@@ -40,10 +40,15 @@ Local credentials, virtual environments, Python caches, and ADK session data are
 
 ## Prerequisites
 
-- Python 3.10 or newer
-- A Google AI Studio API key or a configured Google Cloud project
+Before you start, make sure you have the following. These are the minimum tools ADK needs to run an agent locally.
+
+- **Python 3.10 or newer** — ADK is a Python framework, so you need a Python interpreter installed to run it at all. Check your version with `python3 --version`. If it's older than 3.10, install a newer Python from [python.org](https://www.python.org/downloads/) first.
+- **A Google AI Studio API key or a configured Google Cloud project** — the agent's "brain" is a Gemini model, which runs on Google's servers, not on your laptop. You need credentials so your code is allowed to call that model. An [AI Studio](https://aistudio.google.com/) API key is the fastest option for a workshop; a Vertex AI project is the alternative if your organization already uses Google Cloud.
+- **Git** — used to download (clone) this project's code to your machine.
 
 ## Setup
+
+Each step below explains *why* it exists, not just what to type, so you understand what's happening to your machine.
 
 1. Clone the repository and enter its directory.
 
@@ -51,6 +56,8 @@ Local credentials, virtual environments, Python caches, and ADK session data are
    git clone <your-repository-url>
    cd <repository-directory>
    ```
+
+   `git clone` downloads a copy of this project (all its files and history) from a remote location to your computer. `cd` ("change directory") then moves your terminal into that new folder, so every command you run afterward applies to this project instead of wherever you were before.
 
 2. Create and activate a virtual environment.
 
@@ -68,11 +75,17 @@ Local credentials, virtual environments, Python caches, and ADK session data are
    .venv\Scripts\Activate.ps1
    ```
 
+   **What is a virtual environment, and why bother?** Every Python project needs its own set of installed packages (libraries), often at specific versions. If you installed everything globally on your machine, two projects that need different versions of the same package would conflict, and eventually your system Python would become a tangle of incompatible libraries.
+
+   A virtual environment ("venv") is an isolated, self-contained copy of Python that lives inside a folder — here, `.venv` — just for this project. `python3 -m venv .venv` creates that folder. `source .venv/bin/activate` (or `Activate.ps1` on Windows) then tells your current terminal session "use the Python and packages inside `.venv`, not the system-wide ones." You'll know it worked because your terminal prompt will show `(.venv)` at the start of the line. You only need to activate it once per terminal session; deactivate any time with `deactivate`.
+
 3. Install the dependencies.
 
    ```bash
    python -m pip install -r requirements.txt
    ```
+
+   `pip` is Python's package manager — it downloads and installs libraries from the Python Package Index (PyPI). `requirements.txt` is a plain text file listing exactly which libraries this project needs (in this case, the `google-adk` package and its dependencies) so that anyone setting up the project gets the same, known-working set instead of guessing what to install. Running this with your venv active means the libraries are installed *inside* `.venv`, keeping them isolated from other projects.
 
 4. Create your local environment file.
 
@@ -88,7 +101,11 @@ Local credentials, virtual environments, Python caches, and ADK session data are
    Copy-Item .env.example .env
    ```
 
+   `.env.example` is a template checked into Git showing which configuration values the project expects (like which API key variable name to use) without containing any real secrets. Copying it to `.env` gives you your own private file to fill in. `.env` is listed in `.gitignore`, so Git will never track or upload it — this is what keeps your personal API key from accidentally ending up in a public repository.
+
 5. Edit `.env` and provide either your Google AI Studio API key or your Vertex AI project settings. Never commit this file.
+
+   ADK reads these environment variables at startup to know which Gemini model account to bill and authenticate against. Treat this file like a password: don't paste its contents into chat, screenshots, or commits.
 
 ## Run the agent
 
@@ -98,7 +115,7 @@ From the repository root, with the virtual environment active, run:
 adk web
 ```
 
-Open the local URL printed by ADK and select `university_helpdesk`.
+`adk web` is a command installed by the `google-adk` package (from step 3). It scans the current directory for agent folders like `helpdesk_agent/`, starts a local web server, and gives you a chat UI in the browser to talk to your agent — so you can test it interactively without writing any extra code. It prints a local URL (something like `http://localhost:8000`); open that in a browser and select `university_helpdesk` from the list of available agents. Stop the server anytime with `Ctrl+C` in the terminal.
 
 ## Example prompts
 
