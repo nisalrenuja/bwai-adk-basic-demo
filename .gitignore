@@ -1,0 +1,38 @@
+# Credentials and local configuration
+.env
+.env.*
+!.env.example
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Python-generated files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Test, lint, type-check, and coverage output
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Build output
+build/
+dist/
+*.egg-info/
+
+# Google ADK local state
+.adk/
+*.db
+*.db-shm
+*.db-wal
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
