@@ -370,6 +370,7 @@ lookup behind a function.
 | Symptom | Cause | Fix |
 |---------|-------|-----|
 | Agent dropdown is empty in `adk web` | Started the server from the wrong directory | Run `adk web` from the repository root, which contains the agent folders |
+| `[Errno 48] address already in use` on port 8000 | An earlier `adk web` is still running, often orphaned after its terminal closed | `lsof -ti:8000 \| xargs kill` to stop it, or start on another port with `adk web --port 9000` |
 | `command not found: adk` | Virtualenv not active | `source .venv/bin/activate` |
 | `401` / `API key not valid` | Missing or wrong `GOOGLE_API_KEY` | Check this folder's `.env` first, then the repository root one; regenerate the key in Google AI Studio |
 | `404` / model not found | The chosen model isn't available on your key | Set `GOOGLE_GENAI_MODEL` in `.env` to a model your key can access, or change the fallback in `agent.py` |

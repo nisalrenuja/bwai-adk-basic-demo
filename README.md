@@ -34,13 +34,13 @@ Try: *"Plan a 5-day trip to Sigiriya and the Cultural Triangle in February for t
 ├── helpdesk_agent/
 │   ├── __init__.py
 │   ├── agent.py            # data, four function tools, the Agent
-│   ├── .env.example         # per-agent config template
+│   ├── .env.example        # per-agent config template
 │   └── README.md
 ├── trip_organizer_agent/
 │   ├── __init__.py
 │   ├── agent.py            # the SequentialAgent pipeline
 │   ├── instructions.py     # prompts for every sub-agent
-│   ├── .env.example         # per-agent config template
+│   ├── .env.example        # per-agent config template
 │   └── README.md
 ├── .env.example            # shared config template (repository root)
 ├── .gitignore
@@ -172,6 +172,29 @@ adk run trip_organizer_agent
 
 Always run these from the repository root - `trip_organizer_agent/agent.py` imports `trip_organizer_agent.instructions`, so the parent directory has to be on the Python path.
 
+### If port 8000 is already in use
+
+```
+ERROR: [Errno 48] error while attempting to bind on address ('127.0.0.1', 8000): address already in use
+```
+
+An earlier `adk web` is still running. This happens easily: closing the terminal does not always stop the server, and a process started in the background can be orphaned and keep holding the port.
+
+Find it and stop it:
+
+```bash
+lsof -nP -iTCP:8000 -sTCP:LISTEN     # see what is holding the port
+lsof -ti:8000 | xargs kill           # stop it
+```
+
+If it refuses to die, `lsof -ti:8000 | xargs kill -9`. Or just use a different port and leave the old one alone:
+
+```bash
+adk web --port 9000
+```
+
+On Windows PowerShell the equivalent lookup is `Get-NetTCPConnection -LocalPort 8000`, then `Stop-Process -Id <pid>`.
+
 ## Troubleshooting
 
 | Symptom | Cause | Fix |
@@ -181,6 +204,7 @@ Always run these from the repository root - `trip_organizer_agent/agent.py` impo
 | `command not found: adk` | Virtual environment not active | `source .venv/bin/activate` (or `.venv\Scripts\Activate.ps1`) |
 | `Warning: python-dotenv not installed` | Dependencies not installed, or wrong venv | Activate the venv and run `python -m pip install -r requirements.txt` |
 | `401` / `API key not valid` | Missing or wrong `GOOGLE_API_KEY` | Check your `.env`; regenerate the key at [AI Studio](https://aistudio.google.com/apikey) |
+| `[Errno 48] address already in use` on port 8000 | An earlier `adk web` is still running, often orphaned after its terminal closed | `lsof -ti:8000 \| xargs kill` to stop it, or start on another port with `adk web --port 9000` |
 | `429 RESOURCE_EXHAUSTED` | Free-tier rate limit - the trip organizer's six sequential agents burn quota fast | Wait and retry, use a lighter model, or enable billing |
 | `429` only after adding `google_search` | Grounding is billed separately from the model | See [the isolation test](trip_organizer_agent/README.md#the-catch-grounding-is-billed-separately) |
 

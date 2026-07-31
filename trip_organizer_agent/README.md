@@ -461,6 +461,7 @@ entry fee with no citation is the failure mode worth showing an audience, not hi
 | Agent dropdown is empty in `adk web` | Started the server from the wrong directory | Run `adk web` from the repository root, which contains the agent folders |
 | `429 RESOURCE_EXHAUSTED` | Free-tier rate limit - six sequential agents burn quota fast | Wait and retry, use a lighter model, or enable billing. If the error says `limit: 0`, that project has no free-tier allowance at all and waiting won't help |
 | `429` on the **first** sub-agent only, after adding `google_search` | Grounding is billed separately from the model | See [the isolation test](#the-catch-grounding-is-billed-separately) - `200` without tools and `429` with them means grounding isn't enabled |
+| `[Errno 48] address already in use` on port 8000 | An earlier `adk web` is still running, often orphaned after its terminal closed | `lsof -ti:8000 \| xargs kill` to stop it, or start on another port with `adk web --port 9000` |
 | `command not found: adk` | Virtualenv not active | `source .venv/bin/activate` |
 | Brief quotes a stale price or opening hour | Expected - no live search; facts come from training data | Treat every number as indicative, or [add grounding](#taking-it-further-google-search-grounding) |
 
