@@ -31,7 +31,7 @@ a few tools - then come back here.
 
 ## How It Works
 
-The root agent is a `SequentialAgent` named `TripOrganizerAssistant`. It runs six sub-agents in a
+The root agent is a `SequentialAgent` named `TripPlanner`. It runs six sub-agents in a
 fixed order. Each sub-agent writes its result into session state under an `output_key`, and later
 agents read those keys from their instructions.
 
@@ -39,40 +39,40 @@ agents read those keys from their instructions.
 User request
      │
      ▼
-┌─────────────────────────┐
-│ 1. DestinationResearcher│  ← no tools; see "Taking It Further"
-│    → destination_research
-└─────────────────────────┘
+┌────────────────────────────┐
+│ 1. PlaceFinder             │  ← no tools; see "Taking It Further"
+│    → destination_research  │
+└────────────────────────────┘
      │
      ▼
-┌─────────────────────────┐
-│ 2. ItineraryPlanner     │  reads: destination_research
-│    → itinerary_plan     │
-└─────────────────────────┘
+┌────────────────────────────┐
+│ 2. DayPlanner              │    reads: destination_research
+│    → itinerary_plan        │
+└────────────────────────────┘
      │
      ▼
-┌─────────────────────────┐
-│ 3. LogisticsPlanner     │  reads: itinerary_plan, destination_research
-│    → logistics_plan     │
-└─────────────────────────┘
+┌────────────────────────────┐
+│ 3. TravelPlanner           │    reads: itinerary_plan, destination_research
+│    → logistics_plan        │
+└────────────────────────────┘
      │
      ▼
-┌─────────────────────────┐
-│ 4. BudgetEstimator      │  reads: destination_research, itinerary_plan, logistics_plan
-│    → budget_breakdown   │
-└─────────────────────────┘
+┌────────────────────────────┐
+│ 4. CostEstimator           │    reads: destination_research, itinerary_plan, logistics_plan
+│    → budget_breakdown      │
+└────────────────────────────┘
      │
      ▼
-┌─────────────────────────┐
-│ 5. PackingAndPrepAdvisor│  reads: destination_research, itinerary_plan
-│    → packing_and_prep   │
-└─────────────────────────┘
+┌────────────────────────────┐
+│ 5. PackingHelper           │    reads: destination_research, itinerary_plan
+│    → packing_and_prep      │
+└────────────────────────────┘
      │
      ▼
-┌─────────────────────────┐
-│ 6. TripBriefFormatter   │  reads: all of the above
-│    → final_trip_brief   │
-└─────────────────────────┘
+┌────────────────────────────┐
+│ 6. TripWriter              │    reads: all of the above
+│    → final_trip_brief      │
+└────────────────────────────┘
      │
      ▼
 Final Markdown trip brief
@@ -85,12 +85,12 @@ point of `SequentialAgent`: the pipeline is predictable and each step is indepen
 
 | # | Agent | Tools | State key written | Responsibility |
 |---|-------|-------|-------------------|----------------|
-| 1 | `DestinationResearcher` | - | `destination_research` | Attractions, best time to visit, weather, local transport, typical costs, safety, visa/entry notes |
-| 2 | `ItineraryPlanner` | - | `itinerary_plan` | Day-by-day plan (morning/afternoon/evening), grouped geographically, with travel times |
-| 3 | `LogisticsPlanner` | - | `logistics_plan` | Transport per transition, which areas to stay in, what to book in advance |
-| 4 | `BudgetEstimator` | - | `budget_breakdown` | Per-category cost ranges, per-person and whole-trip totals, daily spend |
-| 5 | `PackingAndPrepAdvisor` | - | `packing_and_prep` | Packing list, documents and admin, local practicalities (currency, plugs, SIM, etiquette) |
-| 6 | `TripBriefFormatter` | - | `final_trip_brief` | Merges everything into one Markdown brief, preserving earlier caveats |
+| 1 | `PlaceFinder` | - | `destination_research` | Attractions, best time to visit, weather, local transport, typical costs, safety, visa/entry notes |
+| 2 | `DayPlanner` | - | `itinerary_plan` | Day-by-day plan (morning/afternoon/evening), grouped geographically, with travel times |
+| 3 | `TravelPlanner` | - | `logistics_plan` | Transport per transition, which areas to stay in, what to book in advance |
+| 4 | `CostEstimator` | - | `budget_breakdown` | Per-category cost ranges, per-person and whole-trip totals, daily spend |
+| 5 | `PackingHelper` | - | `packing_and_prep` | Packing list, documents and admin, local practicalities (currency, plugs, SIM, etiquette) |
+| 6 | `TripWriter` | - | `final_trip_brief` | Merges everything into one Markdown brief, preserving earlier caveats |
 
 **No sub-agent currently has a tool.** Agent 1 researches from the model's own training data;
 agents 2–6 are pure reasoning steps over what is already in session state. That keeps a full run
@@ -258,23 +258,23 @@ people, budget around LKR 150,000 total, interested in ancient sites and wildlif
 
 **What happens:**
 
-1. `DestinationResearcher` reports February weather in the dry zone (the best window for the
+1. `PlaceFinder` reports February weather in the dry zone (the best window for the
    Cultural Triangle), Sigiriya Rock Fortress and Dambulla Cave Temple, Polonnaruwa and Minneriya,
    and how to get there from Colombo - flagging ticket prices and opening hours as things to verify,
    since it has no live search.
-2. `ItineraryPlanner` produces Day 1–5 with morning/afternoon/evening blocks: the Sigiriya climb at
+2. `DayPlanner` produces Day 1–5 with morning/afternoon/evening blocks: the Sigiriya climb at
    dawn before the heat and the crowds, Pidurangala for the view back at the rock, Dambulla on the
    way past, Polonnaruwa by bicycle on a full day, and a Minneriya or Kaudulla safari at dusk.
-3. `LogisticsPlanner` recommends a van and driver versus the Colombo→Habarana bus, suggests basing
+3. `TravelPlanner` recommends a van and driver versus the Colombo→Habarana bus, suggests basing
    all four nights in Sigiriya or Habarana rather than moving hotels, and flags the safari jeep and
    the Sigiriya ticket as things to sort out in advance.
-4. `BudgetEstimator` breaks the LKR 150,000 into transport, accommodation, food, site tickets - and
+4. `CostEstimator` breaks the LKR 150,000 into transport, accommodation, food, site tickets - and
    notes that foreign-national rates at Sigiriya and Polonnaruwa are far higher than local rates,
    so the total swings hard on that assumption - safari jeep hire, and a contingency.
-5. `PackingAndPrepAdvisor` covers sun protection and water for the climb, shoulder-and-knee cover
+5. `PackingHelper` covers sun protection and water for the climb, shoulder-and-knee cover
    for the cave temple, leech socks if you're extending into the hills, plug type G, and cash for
    places outside Colombo that don't take cards.
-6. `TripBriefFormatter` merges it all into one Markdown document.
+6. `TripWriter` merges it all into one Markdown document.
 
 **Output:** a single Markdown brief with sections for *Trip at a Glance*, *Destination Overview*,
 *Itinerary*, *Logistics*, *Budget*, and *Packing & Preparation*.
@@ -309,7 +309,7 @@ Change it there and every step picks it up. To give a single sub-agent a differe
 
 ```python
 budget_estimator_agent = LlmAgent(
-    name="BudgetEstimator",
+    name="CostEstimator",
     model="gemini-2.5-pro",   # override just this step
     instruction=BUDGET_ESTIMATOR_INSTRUCTION,
     output_key="budget_breakdown",
@@ -352,7 +352,7 @@ This is the single most valuable upgrade to this agent, and it is a two-line cha
 
 ### Where the facts come from today
 
-`DestinationResearcher` has no tools, so everything in the brief comes from the model's **training
+`PlaceFinder` has no tools, so everything in the brief comes from the model's **training
 data**. That works better than you might expect for well-documented places: the model already
 "knows" the Sigiriya rock fortress, the dress code at Dambulla Cave Temple, that Polonnaruwa is
 best explored by bicycle, and that February is dry season in the Cultural Triangle. None of that
@@ -385,7 +385,7 @@ grep -o 'groundingMetadata\|webSearchQueries\|groundingChunks' response.json
    from google.adk.tools import google_search
 
    destination_research_agent = LlmAgent(
-       name="DestinationResearcher",
+       name="PlaceFinder",
        model=MODEL_NAME,
        instruction=DESTINATION_RESEARCH_INSTRUCTION,
        tools=[google_search],          # ← add this
