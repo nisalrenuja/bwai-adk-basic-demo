@@ -1,10 +1,16 @@
 # Credentials and local configuration
+# These match at any depth, so per-agent files like
+# trip_organizer_agent/.env are ignored too.
 .env
 .env.*
 !.env.example
+*.key
+*-service-account.json
+application_default_credentials.json
 
 # Virtual environments
 .venv/
+.venv*/
 venv/
 env/
 
@@ -27,9 +33,11 @@ dist/
 
 # Google ADK local state
 .adk/
+sessions.db
 *.db
 *.db-shm
 *.db-wal
+*.log
 
 # Editors and operating systems
 .idea/

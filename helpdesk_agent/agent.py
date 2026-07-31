@@ -63,8 +63,8 @@ CAMPUS_INFO = {
         "note": "The main canteen is closed on Sundays and public holidays.",
     },
     "hostel": {
-        "male_hostel": "Block A and Block B — Warden: Mr. Kumara, +94 77 123 4567",
-        "female_hostel": "Block C — Warden: Ms. Dilrukshi, +94 77 234 5678",
+        "male_hostel": "Block A and Block B - Warden: Mr. Kumara, +94 77 123 4567",
+        "female_hostel": "Block C - Warden: Ms. Dilrukshi, +94 77 234 5678",
         "visitor_hours": "4:00 PM to 7:00 PM on weekdays, 9:00 AM to 7:00 PM on weekends",
         "contact": "hostel@university.lk",
     },
@@ -82,7 +82,7 @@ CAMPUS_INFO = {
     },
     "general": {
         "main_office": "Monday to Friday, 8:30 AM to 4:30 PM",
-        "security": "24 hours, 7 days a week — +94 11 234 5600",
+        "security": "24 hours, 7 days a week - +94 11 234 5600",
         "student_affairs": "Monday to Friday, 8:30 AM to 4:00 PM",
         "wifi": "Eduroam and UniWifi available across campus. Register via the Student Portal.",
     },
@@ -182,8 +182,8 @@ Every answer must be grounded in what the tools return.
 When a student asks about courses, use list_courses.
 When a student asks about exams or exam schedules, use get_exam_schedule.
 When a student asks about registration, deadlines, or fees, use get_registration_info.
-When a student asks about campus facilities — library, canteen, hostel, clinic,
-sports — use get_campus_info.
+When a student asks about campus facilities - library, canteen, hostel, clinic,
+sports - use get_campus_info.
 
 If a student's question is unclear, ask one simple clarifying question before
 calling a tool. For example, if they ask about exams but do not mention their
