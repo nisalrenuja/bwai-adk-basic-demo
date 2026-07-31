@@ -1,4 +1,5 @@
-import dotenv
+import os
+
 from google.adk.agents import LlmAgent, SequentialAgent
 
 from trip_organizer_agent.instructions import (
@@ -11,10 +12,15 @@ from trip_organizer_agent.instructions import (
     TRIP_ORCHESTRATOR_INSTRUCTION
 )
 
-dotenv.load_dotenv()
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
 
-# Shared by every sub-agent below.
-MODEL_NAME = "gemini-3.1-flash-lite"
+    # Shared by every sub-agent below.
+    MODEL_NAME = os.environ.get("GOOGLE_GENAI_MODEL", "gemini-3.1-flash-lite")
+except ImportError:
+    print("Warning: python-dotenv not installed. Ensure API key is set")
+    MODEL_NAME = "gemini-3.1-flash-lite"
 
 # --- Sub Agent 1: PlaceFinder ---
 # No tools: Google Search grounding needs a separate paid quota, so this agent

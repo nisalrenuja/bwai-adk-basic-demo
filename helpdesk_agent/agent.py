@@ -1,11 +1,18 @@
 from __future__ import annotations
 
+import os
 from typing import Literal
 
-import dotenv
 from google.adk.agents import Agent
 
-dotenv.load_dotenv()
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+
+    MODEL_NAME = os.environ.get("GOOGLE_GENAI_MODEL", "gemini-3.1-flash-lite")
+except ImportError:
+    print("Warning: python-dotenv not installed. Ensure API key is set")
+    MODEL_NAME = "gemini-3.1-flash-lite"
 
 # ── Data ─────────────────────────────────────────────────────────────────────
 
@@ -169,7 +176,7 @@ def get_campus_info(
 
 root_agent = Agent(
     name="university_helpdesk",
-    model="gemini-3.1-flash-lite",
+    model=MODEL_NAME,
     description="A helpful university helpdesk assistant for students.",
     instruction="""
 You are the official virtual helpdesk assistant for the university.

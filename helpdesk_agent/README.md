@@ -119,9 +119,10 @@ deadline, the late fee, finance-division hours, and the registrar's contact deta
 
 ```
 helpdesk_agent/
-├── __init__.py   # exposes `agent` so ADK can discover root_agent
-├── agent.py      # data, four function tools, and the Agent definition
-└── README.md     # this file
+├── __init__.py     # package marker
+├── agent.py        # data, four function tools, and the Agent definition
+├── .env.example    # config template for this agent (copy to .env)
+└── README.md       # this file
 ```
 
 `agent.py` exports `root_agent`, which is the symbol ADK's CLI and web UI look for when loading an
@@ -185,13 +186,15 @@ GOOGLE_API_KEY=your_actual_api_key_here
 |----------|----------|---------|
 | `GOOGLE_API_KEY` | Yes | Your Google AI Studio / Gemini API key |
 | `GOOGLE_GENAI_USE_VERTEXAI` | No | Set to `TRUE` to authenticate through Vertex AI instead of an API key |
+| `GOOGLE_GENAI_MODEL` | No | Model this agent uses. Defaults to `gemini-3.1-flash-lite` |
 
 If you set `GOOGLE_GENAI_USE_VERTEXAI=TRUE`, drop `GOOGLE_API_KEY` and provide
 `GOOGLE_CLOUD_PROJECT` and `GOOGLE_CLOUD_LOCATION` instead, with application-default credentials
 already set up (`gcloud auth application-default login`).
 
-The model is not configured here - it is pinned in `agent.py`, and `trip_organizer_agent` does the
-same. See [Change the model](#change-the-model).
+Copy [`.env.example`](.env.example) in this folder to `.env` if you want this agent on its own key
+or model; ADK prefers it over the repository root `.env`. Otherwise the root `.env` is used. See
+[Change the model](#change-the-model).
 
 > `.env` is listed in `.gitignore`, so your real key stays local. Keep placeholder values only in
 > `.env.example` - that file **is** tracked by git.
@@ -312,18 +315,14 @@ tells the student no schedule is published, rather than inventing one.
 
 ### Change the model
 
-The model is set directly in the `Agent` definition at the bottom of `agent.py`:
+The model comes from `.env`, with a fallback pinned near the top of `agent.py`:
 
 ```python
-root_agent = Agent(
-    name="university_helpdesk",
-    model="gemini-3.1-flash-lite",   # ← change this
-    ...
-)
+MODEL_NAME = os.environ.get("GOOGLE_GENAI_MODEL", "gemini-3.1-flash-lite")
 ```
 
-`trip_organizer_agent` does the same thing with a `MODEL_NAME` constant, because it has six
-sub-agents to keep in sync. With a single agent here, the literal is clear enough on its own.
+Set `GOOGLE_GENAI_MODEL` in `.env` to switch models without editing code, or change the fallback.
+`trip_organizer_agent` uses the identical pattern.
 
 ### Edit the instruction prompt
 
@@ -372,9 +371,9 @@ lookup behind a function.
 |---------|-------|-----|
 | Agent dropdown is empty in `adk web` | Started the server from the wrong directory | Run `adk web` from the repository root, which contains the agent folders |
 | `command not found: adk` | Virtualenv not active | `source .venv/bin/activate` |
-| `401` / `API key not valid` | Missing or wrong `GOOGLE_API_KEY` | Check `.env` at the repository root; regenerate the key in Google AI Studio |
-| `404` / model not found | The pinned model isn't available on your key | Change `model=` in `agent.py` to a model your key can access |
-| `ModuleNotFoundError: No module named 'dotenv'` | Dependencies not installed, or wrong venv | Activate the venv and run `pip install -r requirements.txt` |
+| `401` / `API key not valid` | Missing or wrong `GOOGLE_API_KEY` | Check this folder's `.env` first, then the repository root one; regenerate the key in Google AI Studio |
+| `404` / model not found | The chosen model isn't available on your key | Set `GOOGLE_GENAI_MODEL` in `.env` to a model your key can access, or change the fallback in `agent.py` |
+| `Warning: python-dotenv not installed` printed at startup | `agent.py` catches the missing import and carries on, so `.env` is never read | Activate the venv and run `pip install -r requirements.txt`; without it you must export `GOOGLE_API_KEY` yourself |
 | Agent answers without calling a tool | The prompt or docstrings don't make the mapping obvious | Tighten the tool docstrings and the "when a student asks X, use Y" lines in the instruction |
 | Agent asks for a department every time | `get_exam_schedule` requires both arguments by design | Give the department in your question, or make the parameter optional with a default |
 

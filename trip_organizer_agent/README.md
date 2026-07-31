@@ -102,9 +102,10 @@ trade-off and how to add live search.
 
 ```
 trip_organizer_agent/
-├── __init__.py        # exposes `agent` so ADK can discover root_agent
+├── __init__.py        # package marker; imports the agent submodule
 ├── agent.py           # agent definitions + the SequentialAgent pipeline
 ├── instructions.py    # the system prompt for every sub-agent
+├── .env.example       # config template for this agent (copy to .env)
 └── README.md          # this file
 ```
 
@@ -113,7 +114,7 @@ agent folder. `instructions.py` is kept separate so prompts can be edited withou
 
 ## Prerequisites
 
-- **Python 3.11+** (required by Google ADK 2.0+)
+- **Python 3.10+** (`google-adk` requires >=3.10)
 - **pip**
 - A **Google API key** with access to Gemini models - get one free at
   [Google AI Studio](https://aistudio.google.com/apikey)
@@ -168,9 +169,10 @@ GOOGLE_GENAI_USE_VERTEXAI=FALSE
 |----------|----------|---------|---------|
 | `GOOGLE_API_KEY` | Yes | - | Your Google AI Studio / Gemini API key |
 | `GOOGLE_GENAI_USE_VERTEXAI` | No | `FALSE` | Set to `TRUE` to authenticate through Vertex AI instead of an API key |
+| `GOOGLE_GENAI_MODEL` | No | `gemini-3.1-flash-lite` | Model used by all six sub-agents. Read into `MODEL_NAME` in [`agent.py`](agent.py) |
 
-The model is **not** configured here - it is pinned in code as the `MODEL_NAME` constant in
-[`agent.py`](agent.py), the same way `helpdesk_agent` pins its own. See
+Copy [`.env.example`](.env.example) in this folder to `.env` if you want this agent on its own key
+or model; ADK prefers it over the repository root `.env`. Otherwise the root `.env` is used. See
 [Change the model](#change-the-model).
 
 If you set `GOOGLE_GENAI_USE_VERTEXAI=TRUE`, drop `GOOGLE_API_KEY` and provide
@@ -190,7 +192,7 @@ The web UI is the best way to see the pipeline execute, because it shows each su
 and the session state as it fills up.
 
 ```bash
-adk web .
+adk web
 ```
 
 Then open <http://localhost:8000>, pick **trip_organizer_agent** from the agent dropdown, and send
@@ -199,8 +201,8 @@ your trip request in the chat box.
 Useful flags:
 
 ```bash
-adk web . --port 9000                        # different port
-adk web . --session_service_uri sqlite://sessions.db   # persist sessions to disk
+adk web --port 9000                        # different port
+adk web --session_service_uri sqlite://sessions.db   # persist sessions to disk
 ```
 
 ### Option 2 - CLI, single request
@@ -222,7 +224,7 @@ adk run trip_organizer_agent
 Expose the agent over HTTP for use from your own frontend or scripts:
 
 ```bash
-adk api_server .
+adk api_server
 ```
 
 Then call it:
@@ -298,13 +300,14 @@ apply to inbound travellers.
 
 ### Change the model
 
-One constant near the top of `agent.py` feeds all six sub-agents:
+One constant near the top of `agent.py` feeds all six sub-agents, and it reads `.env`:
 
 ```python
-MODEL_NAME = "gemini-3.1-flash-lite"
+MODEL_NAME = os.environ.get("GOOGLE_GENAI_MODEL", "gemini-3.1-flash-lite")
 ```
 
-Change it there and every step picks it up. To give a single sub-agent a different model, pass
+So set `GOOGLE_GENAI_MODEL` in `.env` to switch models without touching code, or change the
+fallback in `agent.py`. Either way every step picks it up. To give a single sub-agent a different model, pass
 `model=` explicitly on that one:
 
 ```python
@@ -453,9 +456,9 @@ entry fee with no citation is the failure mode worth showing an audience, not hi
 | Symptom | Cause | Fix |
 |---------|-------|-----|
 | `ModuleNotFoundError: No module named 'trip_organizer_agent'` | Running from inside the agent folder | `cd` to the repository root and run `adk run trip_organizer_agent` from there |
-| `Warning: python-dotenv not installed` | Dependencies not installed, or wrong venv | Activate the venv and run `pip install -r requirements.txt` |
-| `401` / `API key not valid` | Missing or wrong `GOOGLE_API_KEY` | Check `.env` at the repository root; regenerate the key in Google AI Studio |
-| Agent dropdown is empty in `adk web` | Started the server from the wrong directory | Run `adk web .` from the repository root, which contains the agent folders |
+| `Warning: python-dotenv not installed` printed at startup | `agent.py` catches the missing import and carries on, so `.env` is never read | Activate the venv and run `pip install -r requirements.txt`; without it you must export `GOOGLE_API_KEY` yourself |
+| `401` / `API key not valid` | Missing or wrong `GOOGLE_API_KEY` | Check this folder's `.env` first, then the repository root one; regenerate the key in Google AI Studio |
+| Agent dropdown is empty in `adk web` | Started the server from the wrong directory | Run `adk web` from the repository root, which contains the agent folders |
 | `429 RESOURCE_EXHAUSTED` | Free-tier rate limit - six sequential agents burn quota fast | Wait and retry, use a lighter model, or enable billing. If the error says `limit: 0`, that project has no free-tier allowance at all and waiting won't help |
 | `429` on the **first** sub-agent only, after adding `google_search` | Grounding is billed separately from the model | See [the isolation test](#the-catch-grounding-is-billed-separately) - `200` without tools and `429` with them means grounding isn't enabled |
 | `command not found: adk` | Virtualenv not active | `source .venv/bin/activate` |

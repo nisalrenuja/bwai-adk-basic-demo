@@ -34,13 +34,15 @@ Try: *"Plan a 5-day trip to Sigiriya and the Cultural Triangle in February for t
 ├── helpdesk_agent/
 │   ├── __init__.py
 │   ├── agent.py            # data, four function tools, the Agent
+│   ├── .env.example         # per-agent config template
 │   └── README.md
 ├── trip_organizer_agent/
 │   ├── __init__.py
 │   ├── agent.py            # the SequentialAgent pipeline
 │   ├── instructions.py     # prompts for every sub-agent
+│   ├── .env.example         # per-agent config template
 │   └── README.md
-├── .env.example
+├── .env.example            # shared config template (repository root)
 ├── .gitignore
 ├── README.md
 └── requirements.txt
@@ -119,7 +121,27 @@ Each step below explains *why* it exists, not just what to type, so you understa
 
 ## Configuration
 
-One `.env` at the repository root serves both agents.
+You can configure the agents in either of two places:
+
+| Location | Template to copy | Use when |
+| --- | --- | --- |
+| Repository root `.env` | `.env.example` | One key for both agents. Simplest, and what a workshop usually wants. |
+| `helpdesk_agent/.env`, `trip_organizer_agent/.env` | that folder's `.env.example` | You want each agent on its own key, project, or model. |
+
+**When you run under `adk web` or `adk run`, the agent's own `.env` wins.** ADK searches upward
+from the agent folder and stops at the first `.env` it finds, so a file inside
+`trip_organizer_agent/` takes priority over the one at the root.
+
+Each `agent.py` also calls `load_dotenv()` itself, so the agents still work in a plain script or
+notebook where ADK's CLI never runs. That call searches upward from your **current working
+directory**, so from the repository root it picks up the root `.env` and does not see a per-agent
+one. In short: per-agent `.env` files are honoured by ADK, and the root `.env` is the reliable
+choice everywhere else.
+
+A variable exported in your shell beats every `.env`, because `load_dotenv` never overwrites
+something already set.
+
+All `.env` files are gitignored at any depth; the `.env.example` templates are tracked.
 
 | Variable | Required | Default | Purpose |
 | --- | --- | --- | --- |
@@ -127,11 +149,7 @@ One `.env` at the repository root serves both agents.
 | `GOOGLE_API_KEY` | When not using Vertex AI | - | Your Google AI Studio / Gemini API key |
 | `GOOGLE_CLOUD_PROJECT` | When using Vertex AI | - | Your GCP project ID |
 | `GOOGLE_CLOUD_LOCATION` | When using Vertex AI | - | Region, e.g. `us-central1` |
-
-**The model is set in code, not in `.env`.** Both agents currently use `gemini-3.1-flash-lite`. To change it, edit the source:
-
-- [`helpdesk_agent/agent.py`](helpdesk_agent/agent.py) - the `model=` argument on the `Agent`
-- [`trip_organizer_agent/agent.py`](trip_organizer_agent/agent.py) - the `MODEL_NAME` constant, shared by all six sub-agents
+| `GOOGLE_GENAI_MODEL` | No | `gemini-3.1-flash-lite` | Model both agents use. Each falls back to the default if unset |
 
 If you set `GOOGLE_GENAI_USE_VERTEXAI=TRUE`, drop `GOOGLE_API_KEY` and set up application-default credentials first with `gcloud auth application-default login`.
 
