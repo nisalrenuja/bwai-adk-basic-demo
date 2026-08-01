@@ -1,11 +1,11 @@
-# ADK Agent Demos
+# ADK Agent Demos - BWAI
 
 A beginner-friendly [Google Agent Development Kit (ADK)](https://google.github.io/adk-docs/) workshop repository containing two agents that demonstrate two different ADK patterns.
 
-| Agent | Folder | Pattern | Docs |
-| --- | --- | --- | --- |
-| University Helpdesk | [`helpdesk_agent/`](helpdesk_agent/) | Single agent + function tools | [README](helpdesk_agent/README.md) |
-| Trip Organizer | [`trip_organizer_agent/`](trip_organizer_agent/) | `SequentialAgent` pipeline | [README](trip_organizer_agent/README.md) |
+| Agent               | Folder                                           | Pattern                       | Docs                                     |
+| ------------------- | ------------------------------------------------ | ----------------------------- | ---------------------------------------- |
+| University Helpdesk | [`helpdesk_agent/`](helpdesk_agent/)             | Single agent + function tools | [README](helpdesk_agent/README.md)       |
+| Trip Organizer      | [`trip_organizer_agent/`](trip_organizer_agent/) | `SequentialAgent` pipeline    | [README](trip_organizer_agent/README.md) |
 
 Start with `helpdesk_agent/` - it shows the fundamentals (one agent, tools, an instruction prompt). Then move to `trip_organizer_agent/` to see multiple agents chained together through shared session state.
 
@@ -15,7 +15,7 @@ Start with `helpdesk_agent/` - it shows the fundamentals (one agent, tools, an i
 
 A single ADK agent that answers student questions about courses, exam schedules, registration procedures, and campus facilities at a Sri Lankan university. Four Python function tools look up real data so the agent never guesses, `Literal` type hints constrain every tool argument to valid values, and the prompt makes the agent ask one clarifying question when a request is ambiguous - for example, asking which department a student is in before looking up an exam schedule.
 
-Try: *"Hi, I am a second-year IT student. What courses do I have this semester?"* or *"When are my exams?"*
+Try: _"Hi, I am a second-year IT student. What courses do I have this semester?"_ or _"When are my exams?"_
 
 → **[Full documentation](helpdesk_agent/README.md)** - tools, data, customizing, troubleshooting.
 
@@ -23,7 +23,7 @@ Try: *"Hi, I am a second-year IT student. What courses do I have this semester?"
 
 A multi-agent trip planner. Give it a one-line request and it returns a complete Markdown trip brief: destination research, a day-by-day itinerary, transport and accommodation logistics, a budget estimate, and a packing checklist. A `SequentialAgent` runs six specialist `LlmAgent`s in a fixed order - `PlaceFinder` → `DayPlanner` → `TravelPlanner` → `CostEstimator` → `PackingHelper` → `TripWriter` - each writing its result into session state for the next one to read. No sub-agent currently uses a tool - they reason over what is already in state, and `PlaceFinder` works from the model's training data. Adding `google_search` back is the headline upgrade, documented in [Taking It Further](trip_organizer_agent/README.md#taking-it-further-google-search-grounding).
 
-Try: *"Plan a 5-day trip to Sigiriya and the Cultural Triangle in February for two people."*
+Try: _"Plan a 5-day trip to Sigiriya and the Cultural Triangle in February for two people."_
 
 → **[Full documentation](trip_organizer_agent/README.md)** - the pipeline, prompts, customizing, limitations.
 
@@ -60,7 +60,7 @@ Before you start, make sure you have the following. These are the minimum tools 
 
 ## Setup
 
-Each step below explains *why* it exists, not just what to type, so you understand what's happening to your machine. One setup serves both agents.
+Each step below explains _why_ it exists, not just what to type, so you understand what's happening to your machine. One setup serves both agents.
 
 1. Clone the repository and enter its directory.
 
@@ -97,7 +97,7 @@ Each step below explains *why* it exists, not just what to type, so you understa
    python -m pip install -r requirements.txt
    ```
 
-   `pip` is Python's package manager - it downloads and installs libraries from the Python Package Index (PyPI). `requirements.txt` is a plain text file listing exactly which libraries this project needs (here, `google-adk` and `python-dotenv`, plus their dependencies) so that anyone setting up the project gets the same, known-working set instead of guessing what to install. Running this with your venv active means the libraries are installed *inside* `.venv`, keeping them isolated from other projects.
+   `pip` is Python's package manager - it downloads and installs libraries from the Python Package Index (PyPI). `requirements.txt` is a plain text file listing exactly which libraries this project needs (here, `google-adk` and `python-dotenv`, plus their dependencies) so that anyone setting up the project gets the same, known-working set instead of guessing what to install. Running this with your venv active means the libraries are installed _inside_ `.venv`, keeping them isolated from other projects.
 
 4. Create your local environment file.
 
@@ -123,10 +123,10 @@ Each step below explains *why* it exists, not just what to type, so you understa
 
 You can configure the agents in either of two places:
 
-| Location | Template to copy | Use when |
-| --- | --- | --- |
-| Repository root `.env` | `.env.example` | One key for both agents. Simplest, and what a workshop usually wants. |
-| `helpdesk_agent/.env`, `trip_organizer_agent/.env` | that folder's `.env.example` | You want each agent on its own key, project, or model. |
+| Location                                           | Template to copy             | Use when                                                              |
+| -------------------------------------------------- | ---------------------------- | --------------------------------------------------------------------- |
+| Repository root `.env`                             | `.env.example`               | One key for both agents. Simplest, and what a workshop usually wants. |
+| `helpdesk_agent/.env`, `trip_organizer_agent/.env` | that folder's `.env.example` | You want each agent on its own key, project, or model.                |
 
 **When you run under `adk web` or `adk run`, the agent's own `.env` wins.** ADK searches upward
 from the agent folder and stops at the first `.env` it finds, so a file inside
@@ -143,13 +143,13 @@ something already set.
 
 All `.env` files are gitignored at any depth; the `.env.example` templates are tracked.
 
-| Variable | Required | Default | Purpose |
-| --- | --- | --- | --- |
-| `GOOGLE_GENAI_USE_VERTEXAI` | Yes | `FALSE` | `FALSE` to authenticate with an API key, `TRUE` to use Vertex AI |
-| `GOOGLE_API_KEY` | When not using Vertex AI | - | Your Google AI Studio / Gemini API key |
-| `GOOGLE_CLOUD_PROJECT` | When using Vertex AI | - | Your GCP project ID |
-| `GOOGLE_CLOUD_LOCATION` | When using Vertex AI | - | Region, e.g. `us-central1` |
-| `GOOGLE_GENAI_MODEL` | No | `gemini-3.1-flash-lite` | Model both agents use. Each falls back to the default if unset |
+| Variable                    | Required                 | Default                 | Purpose                                                          |
+| --------------------------- | ------------------------ | ----------------------- | ---------------------------------------------------------------- |
+| `GOOGLE_GENAI_USE_VERTEXAI` | Yes                      | `FALSE`                 | `FALSE` to authenticate with an API key, `TRUE` to use Vertex AI |
+| `GOOGLE_API_KEY`            | When not using Vertex AI | -                       | Your Google AI Studio / Gemini API key                           |
+| `GOOGLE_CLOUD_PROJECT`      | When using Vertex AI     | -                       | Your GCP project ID                                              |
+| `GOOGLE_CLOUD_LOCATION`     | When using Vertex AI     | -                       | Region, e.g. `us-central1`                                       |
+| `GOOGLE_GENAI_MODEL`        | No                       | `gemini-3.1-flash-lite` | Model both agents use. Each falls back to the default if unset   |
 
 If you set `GOOGLE_GENAI_USE_VERTEXAI=TRUE`, drop `GOOGLE_API_KEY` and set up application-default credentials first with `gcloud auth application-default login`.
 
@@ -197,16 +197,16 @@ On Windows PowerShell the equivalent lookup is `Get-NetTCPConnection -LocalPort 
 
 ## Troubleshooting
 
-| Symptom | Cause | Fix |
-| --- | --- | --- |
-| Agent dropdown is empty in `adk web` | Started the server from the wrong directory | Run `adk web` from the repository root, which contains the agent folders |
-| `ModuleNotFoundError: No module named 'trip_organizer_agent'` | Running from inside the agent folder | `cd` to the repository root and run `adk run trip_organizer_agent` from there |
-| `command not found: adk` | Virtual environment not active | `source .venv/bin/activate` (or `.venv\Scripts\Activate.ps1`) |
-| `Warning: python-dotenv not installed` | Dependencies not installed, or wrong venv | Activate the venv and run `python -m pip install -r requirements.txt` |
-| `401` / `API key not valid` | Missing or wrong `GOOGLE_API_KEY` | Check your `.env`; regenerate the key at [AI Studio](https://aistudio.google.com/apikey) |
-| `[Errno 48] address already in use` on port 8000 | An earlier `adk web` is still running, often orphaned after its terminal closed | `lsof -ti:8000 \| xargs kill` to stop it, or start on another port with `adk web --port 9000` |
-| `429 RESOURCE_EXHAUSTED` | Free-tier rate limit - the trip organizer's six sequential agents burn quota fast | Wait and retry, use a lighter model, or enable billing |
-| `429` only after adding `google_search` | Grounding is billed separately from the model | See [the isolation test](trip_organizer_agent/README.md#the-catch-grounding-is-billed-separately) |
+| Symptom                                                       | Cause                                                                             | Fix                                                                                               |
+| ------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Agent dropdown is empty in `adk web`                          | Started the server from the wrong directory                                       | Run `adk web` from the repository root, which contains the agent folders                          |
+| `ModuleNotFoundError: No module named 'trip_organizer_agent'` | Running from inside the agent folder                                              | `cd` to the repository root and run `adk run trip_organizer_agent` from there                     |
+| `command not found: adk`                                      | Virtual environment not active                                                    | `source .venv/bin/activate` (or `.venv\Scripts\Activate.ps1`)                                     |
+| `Warning: python-dotenv not installed`                        | Dependencies not installed, or wrong venv                                         | Activate the venv and run `python -m pip install -r requirements.txt`                             |
+| `401` / `API key not valid`                                   | Missing or wrong `GOOGLE_API_KEY`                                                 | Check your `.env`; regenerate the key at [AI Studio](https://aistudio.google.com/apikey)          |
+| `[Errno 48] address already in use` on port 8000              | An earlier `adk web` is still running, often orphaned after its terminal closed   | `lsof -ti:8000 \| xargs kill` to stop it, or start on another port with `adk web --port 9000`     |
+| `429 RESOURCE_EXHAUSTED`                                      | Free-tier rate limit - the trip organizer's six sequential agents burn quota fast | Wait and retry, use a lighter model, or enable billing                                            |
+| `429` only after adding `google_search`                       | Grounding is billed separately from the model                                     | See [the isolation test](trip_organizer_agent/README.md#the-catch-grounding-is-billed-separately) |
 
 Agent-specific troubleshooting lives in each agent's own README.
 
